@@ -34,11 +34,11 @@ def extract_ranked_attractions(page) -> list[tuple[str, str]]:
     return items
 
 
-def save_to_excel(rows: list[tuple[int, str, str]], output_path: Path) -> None:
+def save_to_excel(rows: list[tuple[str, str]], output_path: Path) -> None:
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Attractions"
-    sheet.append(["页码", "编号", "景点名称"])
+    sheet.append(["编号", "景点名称"])
     for row in rows:
         sheet.append(list(row))
     workbook.save(output_path)
@@ -49,7 +49,7 @@ def main() -> None:
     if OUTPUT_VIDEO.exists():
         OUTPUT_VIDEO.unlink()
 
-    all_rows: list[tuple[int, str, str]] = []
+    all_rows: list[tuple[str, str]] = []
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -67,10 +67,9 @@ def main() -> None:
         video_path = page.video.path()
 
         while captured_pages < MAX_PAGES:
-            current_page_index = captured_pages + 1
             page_items = extract_ranked_attractions(page)
             for rank, name in page_items:
-                all_rows.append((current_page_index, rank, name))
+                all_rows.append((rank, name))
 
             captured_pages += 1
             if captured_pages >= MAX_PAGES:
